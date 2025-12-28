@@ -81,7 +81,7 @@ struct xSteamUGC {
 #define CALLBACKFUNC(NAME, TOLUA) \
     void On##NAME(T* pCallback, bool bIOFailure) { \
         if (bIOFailure) { \
-            luaL_error(m_L, "IO failure"); \
+            delete this;\
             return; \
         } \
         lua_pushstring(m_L, "SteamUGC_callback_registry"); \

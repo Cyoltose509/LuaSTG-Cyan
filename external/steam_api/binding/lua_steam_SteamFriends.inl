@@ -1,5 +1,18 @@
 #pragma once
 
+// 声明一个静态变量保存状态
+static bool g_bGameOverlayActive = false;
+
+// Steam 回调处理
+class CGameOverlayActivatedCallback {
+public:
+    STEAM_CALLBACK(CGameOverlayActivatedCallback, OnGameOverlayActivated, GameOverlayActivated_t);
+} g_GameOverlayActivatedCallback;
+
+void CGameOverlayActivatedCallback::OnGameOverlayActivated(GameOverlayActivated_t* pCallback) {
+    g_bGameOverlayActive = pCallback->m_bActive != 0;
+}
+
 struct xSteamFriends {
 	static int  ActivateGameOverlay(lua_State* L) {
 		const char* pchDialog = luaL_checkstring(L, 1);
@@ -15,6 +28,10 @@ struct xSteamFriends {
 		lua_pushstring(L, SteamFriends()->GetPersonaName());
 		return 1;
 	}
+	static int GameOverlayActivated(lua_State* L) {
+		lua_pushboolean(L, g_bGameOverlayActive);
+		return 1;
+	}
 
 	static int xRegister(lua_State* L)
 	{
@@ -22,10 +39,11 @@ struct xSteamFriends {
 			xfbinding(ActivateGameOverlay),
 			xfbinding(ActivateGameOverlayToWebPage),
 			xfbinding(GetPersonaName),
+			xfbinding(GameOverlayActivated),
 			{NULL, NULL},
 		};
 		lua_pushstring(L, "SteamFriends");
-		lua_createtable(L, 0, 3);
+		lua_createtable(L, 0, 4);
 		luaL_register(L, NULL, lib);
 		lua_settable(L, -3);
 		return 0;
