@@ -16,3 +16,7 @@ add_subdirectory(shell-integration)
 add_subdirectory(audio)
 add_subdirectory(image)
 add_subdirectory(font)
+add_subdirectory(window-system)
+add_subdirectory(graphics)
+
+add_subdirectory(graphics/example)

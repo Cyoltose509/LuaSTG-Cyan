@@ -1,8 +1,5 @@
 # LuaSTG configurer
 
-add_subdirectory(Shader)
-include(Platform.cmake)
-include(Core.cmake)
 add_subdirectory(Configurer)
 
 # LuaSTG Engine
@@ -35,6 +32,8 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/Debugger/ImGuiExtension.h
     LuaSTG/Debugger/Logger.cpp
     LuaSTG/Debugger/Logger.hpp
+    LuaSTG/Debugger/FrameQuery.hpp
+    LuaSTG/Debugger/FrameQuery.cpp
 
     LuaSTG/GameObject/GameObject.cpp
     LuaSTG/GameObject/GameObject.hpp
@@ -210,10 +209,9 @@ target_link_libraries(LuaSTG PRIVATE
     utility
     utf8
     win32
-    PlatformAPI
+    beautiful_win32_api
     DirectX::ToolKitMini
     Microsoft::DirectXTexMini
-    Core
     xmath
     lua51_static
     lua_plus
@@ -235,17 +233,13 @@ target_link_libraries(LuaSTG PRIVATE
     Core.Clipboard
     Core.ShellIntegration
     Core.Audio
+    Core.WindowSystem
+    Core.Graphics
     LuaSTG.InternalLuaScriptsFileSystem
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/import_luastg_options.cmake)
 
-add_custom_command(TARGET LuaSTG POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Microsoft.XAudio2.Redist>     $<TARGET_FILE_DIR:LuaSTG>/$<TARGET_FILE_NAME:Microsoft.XAudio2.Redist>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Microsoft.D3DCompiler.Redist> $<TARGET_FILE_DIR:LuaSTG>/$<TARGET_FILE_NAME:Microsoft.D3DCompiler.Redist>
-    COMMAND ${CMAKE_COMMAND} -E make_directory                                                ${CMAKE_BINARY_DIR}/bin
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:LuaSTG>                       ${CMAKE_BINARY_DIR}/bin/$<TARGET_FILE_NAME:LuaSTG>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Microsoft.XAudio2.Redist>     ${CMAKE_BINARY_DIR}/bin/$<TARGET_FILE_NAME:Microsoft.XAudio2.Redist>
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Microsoft.D3DCompiler.Redist> ${CMAKE_BINARY_DIR}/bin/$<TARGET_FILE_NAME:Microsoft.D3DCompiler.Redist>
-    VERBATIM
-)
+luastg_target_copy_to_bin_directory(LuaSTG LuaSTG)
+luastg_target_copy_to_bin_directory(LuaSTG Microsoft.XAudio2.Redist)
+luastg_target_copy_to_bin_directory(LuaSTG Microsoft.D3DCompiler.Redist)
