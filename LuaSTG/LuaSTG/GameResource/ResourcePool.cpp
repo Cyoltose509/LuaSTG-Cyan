@@ -345,7 +345,7 @@ namespace luastg
             return false;
         }
         p_sprite->setTextureRect(core::RectF((float)x, (float)y, (float)(x + w), (float)(y + h)));
-        p_sprite->setTextureCenter(core::Vector2F((float)(x + w * 0.5), (float)(y + h * 0.5)));
+        p_sprite->setTextureCenter(core::Vector2F((float)(w * 0.5), (float)(h * 0.5)));
     
         try
         {
@@ -364,6 +364,62 @@ namespace luastg
             spdlog::info("[luastg] CreateSprite: 已从纹理 '{}' 创建图片精灵 '{}' ({})", texname, name, getResourcePoolTypeName());
         }
     
+        return true;
+    }
+
+    // 复制图片精灵
+
+    bool ResourcePool::CopySprite(const char* name, const char* src_name) noexcept
+    {
+        if (m_SpritePool.find(std::string_view(name)) != m_SpritePool.end())
+        {
+            if (ResourceMgr::GetResourceLoadingLog())
+            {
+                spdlog::warn("[luastg] CopySprite: 图片精灵 '{}' 已存在，复制操作已取消", name);
+            }
+            return true;
+        }
+
+        core::SmartReference<IResourceSprite> pSrcSprite = m_pMgr->FindSprite(src_name);
+        if (!pSrcSprite)
+        {
+            spdlog::error("[luastg] CopySprite: 无法复制图片精灵 '{}'，无法找到源精灵 '{}'", name, src_name);
+            return false;
+        }
+
+        core::Graphics::ISprite* p_src_sprite = pSrcSprite->GetSprite();
+        core::SmartReference<core::Graphics::ISprite> p_new_sprite;
+        
+        if (!p_src_sprite->clone(p_new_sprite.put()))
+        {
+            spdlog::error("[luastg] CopySprite: 从源精灵 '{}' 克隆图片精灵 '{}' 失败", src_name, name);
+            return false;
+        }
+
+        try
+        {
+            core::SmartReference<IResourceSprite> tRes;
+            tRes.attach(new ResourceSpriteImpl(
+                name, 
+                p_new_sprite.get(), 
+                pSrcSprite->GetHalfSizeX(), 
+                pSrcSprite->GetHalfSizeY(), 
+                pSrcSprite->IsRectangle()
+            ));
+            
+            m_SpritePool.emplace(name, tRes);
+        }
+        catch (std::exception const& e)
+        {
+            spdlog::error("[luastg] CopySprite: 复制图片精灵 '{}' 失败 ({})", name, e.what());
+            return false;
+        }
+
+        if (ResourceMgr::GetResourceLoadingLog())
+        {
+            spdlog::info("[luastg] CopySprite: 已从源精灵 '{}' 复制图片精灵 '{}' ({})", src_name, name, getResourcePoolTypeName());
+        }
+
         return true;
     }
 

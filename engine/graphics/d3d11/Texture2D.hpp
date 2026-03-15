@@ -17,6 +17,7 @@ namespace core {
         bool isDynamic() const noexcept override { return m_dynamic; }
         bool isPremultipliedAlpha() const noexcept override { return m_pre_mul_alpha; }
         void setPremultipliedAlpha(bool const v) override { m_pre_mul_alpha = v; }
+
         Vector2U getSize() const noexcept override { return m_size; }
 
         bool setSize(Vector2U size) override;
@@ -49,6 +50,11 @@ namespace core {
         bool createResource();
 
     private:
+        bool createTextureAndView();
+        bool createFromProvidedPath();
+        bool createFromImage(IData* data);
+        bool createFromImage(IImage* image);
+
         SmartReference<IGraphicsDevice> m_device;
         SmartReference<IGraphicsSampler> m_sampler;
         SmartReference<IImage> m_image;

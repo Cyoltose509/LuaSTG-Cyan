@@ -97,10 +97,11 @@ namespace core {
         buffer.data = m_pixels;
         buffer.stride = m_description.size.x * getImageFormatPixelSize(m_description.format);
         buffer.size = m_description.size.y * buffer.stride;
+        m_mapped = true;
         return true;
     }
     void Image::unmap() noexcept {
-        if (m_mapped) {
+        if (!m_mapped) {
             Logger::warn("[core] cannot unmap an image that has not been mapped"sv);
         }
         m_mapped = false;

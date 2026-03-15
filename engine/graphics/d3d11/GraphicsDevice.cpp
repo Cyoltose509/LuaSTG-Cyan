@@ -76,8 +76,6 @@ namespace core {
             return false;
         if (!createD3D11())
             return false;
-        if (!createWIC())
-            return false;
 #ifdef LUASTG_ENABLE_DIRECT2D
         if (!createD2D1())
             return false;
@@ -91,14 +89,13 @@ namespace core {
 #ifdef LUASTG_ENABLE_DIRECT2D
         destroyD2D1();
 #endif
-        destroyWIC(); // 长生存期
         destroyD3D11();
         destroyDXGI();
         assert(m_event_listeners.size() == 0);
     }
     bool GraphicsDevice::handleDeviceLost() {
         if (d3d11_device) {
-            gHR = d3d11_device->GetDeviceRemovedReason();
+            win32::check_hresult(d3d11_device->GetDeviceRemovedReason());
         }
         return doDestroyAndCreate();
     }
@@ -238,9 +235,10 @@ namespace core {
         }
 
         if (!dxgi_adapter) {
-            hr = gHR = Platform::Direct3D11::GetDeviceAdater(d3d11_device.get(), dxgi_adapter.put());
-            if (FAILED(hr)) {
-                Logger::error("Windows API failed: Platform::Direct3D11::GetDeviceAdater");
+            if (!win32::check_hresult_as_boolean(
+                Platform::Direct3D11::GetDeviceAdater(d3d11_device.get(), dxgi_adapter.put()),
+                "Platform::Direct3D11::GetDeviceAdater"sv
+            )) {
                 return false;
             }
         }
@@ -279,35 +277,6 @@ namespace core {
         d3d11_devctx.reset();
         d3d11_devctx1.reset();
     }
-    bool GraphicsDevice::createWIC() {
-        HRESULT hr = S_OK;
-
-        hr = gHR = CoCreateInstance(CLSID_WICImagingFactory2, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(wic_factory2.put()));
-        if (SUCCEEDED(hr)) {
-            hr = gHR = wic_factory2->QueryInterface(wic_factory.put());
-            assert(SUCCEEDED(hr));
-            if (FAILED(hr)) {
-                Logger::error("Windows API failed: IWICImagingFactory2::QueryInterface -> IWICImagingFactory");
-                return false;
-            }
-        }
-        else {
-            Logger::error("Windows API failed: CoCreateInstance -> IWICImagingFactory2");
-            // 没有那么严重，来再一次
-            hr = gHR = CoCreateInstance(CLSID_WICImagingFactory1, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(wic_factory.put()));
-            assert(SUCCEEDED(hr));
-            if (FAILED(hr)) {
-                Logger::error("Windows API failed: CoCreateInstance -> IWICImagingFactory");
-                return false;
-            }
-        }
-
-        return true;
-    }
-    void GraphicsDevice::destroyWIC() {
-        wic_factory.reset();
-        wic_factory2.reset();
-    }
 #ifdef LUASTG_ENABLE_DIRECT2D
     bool GraphicsDevice::createD2D1() {
         HRESULT hr = S_OK;
@@ -316,32 +285,37 @@ namespace core {
     #if (!defined(NDEBUG) && defined(LUASTG_GRAPHICS_DEBUG_LAYER_ENABLE))
         d2d1_options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
     #endif
-        hr = gHR = D2D1CreateFactory(
-            D2D1_FACTORY_TYPE_MULTI_THREADED,
-            __uuidof(ID2D1Factory1),
-            &d2d1_options,
-            d2d1_factory.put<void>());
-        if (FAILED(hr)) {
-            Logger::error("Windows API failed: D2D1CreateFactory -> ID2D1Factory1");
+        if (!win32::check_hresult_as_boolean(
+            D2D1CreateFactory(
+                D2D1_FACTORY_TYPE_MULTI_THREADED,
+                __uuidof(ID2D1Factory1),
+                &d2d1_options,
+                d2d1_factory.put<void>()
+            ),
+            "D2D1CreateFactory (ID2D1Factory1)"sv
+        )) {
             assert(false); return false;
         }
 
         win32::com_ptr<IDXGIDevice> dxgi_device;
-        hr = gHR = d3d11_device->QueryInterface(dxgi_device.put());
-        if (FAILED(hr)) {
-            Logger::error("Windows API failed: ID3D11Device::QueryInterface -> IDXGIDevice");
+        if (!win32::check_hresult_as_boolean(
+            d3d11_device->QueryInterface(dxgi_device.put()),
+            "ID3D11Device::QueryInterface (IDXGIDevice)"sv
+        )) {
             assert(false); return false;
         }
 
-        hr = gHR = d2d1_factory->CreateDevice(dxgi_device.get(), d2d1_device.put());
-        if (FAILED(hr)) {
-            Logger::error("Windows API failed: ID2D1Factory1::CreateDevice");
+        if (!win32::check_hresult_as_boolean(
+            d2d1_factory->CreateDevice(dxgi_device.get(), d2d1_device.put()),
+            "ID2D1Factory1::CreateDevice"sv
+        )) {
             assert(false); return false;
         }
 
-        hr = gHR = d2d1_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, d2d1_devctx.put());
-        if (FAILED(hr)) {
-            Logger::error("Windows API failed: ID2D1Device::CreateDeviceContext");
+        if (!win32::check_hresult_as_boolean(
+            d2d1_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, d2d1_devctx.put()),
+            "ID2D1Device::CreateDeviceContext"sv
+        )) {
             assert(false); return false;
         }
 

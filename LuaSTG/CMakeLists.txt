@@ -24,6 +24,22 @@ target_compile_definitions(LuaSTG PRIVATE
     LDEVVERSION
 )
 
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/LuaSTG/LConfig.h.in"
+    "${CMAKE_CURRENT_LIST_DIR}/LuaSTG/LConfig.h"
+    @ONLY
+)
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/LuaSTG/LuaSTG.manifest.in"
+    "${CMAKE_CURRENT_LIST_DIR}/LuaSTG/LuaSTG.manifest"
+    @ONLY
+)
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/LuaSTG/Custom/resource.rc.in"
+    "${CMAKE_CURRENT_LIST_DIR}/LuaSTG/Custom/resource.rc"
+    @ONLY
+)
+
 set(LUASTG_ENGINE_SOURCES
     LuaSTG/SharedHeaders.h
     LuaSTG/SharedHeaders.cpp
@@ -128,6 +144,10 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/LuaBinding/modern/SwapChain.cpp
     LuaSTG/LuaBinding/modern/Texture2D.hpp
     LuaSTG/LuaBinding/modern/Texture2D.cpp
+    LuaSTG/LuaBinding/modern/VideoDecoder.hpp
+    LuaSTG/LuaBinding/modern/VideoDecoder.cpp
+    LuaSTG/LuaBinding/VideoBindingHelpers.hpp
+    LuaSTG/LuaBinding/VideoBindingHelpers.cpp
     LuaSTG/LuaBinding/modern/RenderTarget.hpp
     LuaSTG/LuaBinding/modern/RenderTarget.cpp
     LuaSTG/LuaBinding/modern/DepthStencilBuffer.hpp

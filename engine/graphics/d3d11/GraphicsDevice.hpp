@@ -22,6 +22,7 @@ namespace core {
         bool createTextureFromFile(StringView path, bool mipmap, ITexture2D** out_texture) override;
         bool createTexture(Vector2U size, ITexture2D** out_texture) override;
         bool createTextureFromImage(IImage* image, bool mipmap, ITexture2D** out_texture) override;
+        bool createVideoDecoder(IVideoDecoder** out_decoder) override;
 
         bool createSampler(const GraphicsSamplerInfo& info, IGraphicsSampler** out_sampler) override;
 
@@ -67,7 +68,6 @@ namespace core {
         StringView getGpuName(uint32_t index) override { return dxgi_adapter_name_list[index]; }
         StringView getCurrentGpuName() const noexcept override { return dxgi_adapter_name; }
 
-        void* getNativeHandle() override { return d3d11_device.get(); }
 #ifdef LUASTG_ENABLE_DIRECT2D
         void* getNativeRendererHandle() override { return d2d1_devctx.get(); }
 #else
@@ -93,8 +93,6 @@ namespace core {
         ID2D1DeviceContext* GetD2D1DeviceContext() const noexcept { return d2d1_devctx.get(); }
 #endif
 
-        IWICImagingFactory* GetWICImagingFactory() const noexcept { return wic_factory.get(); }
-
         tracy_d3d11_context_t GetTracyContext() const noexcept { return tracy_context; }
 
         bool create();
@@ -117,8 +115,6 @@ namespace core {
         void destroyDXGI();
         bool createD3D11();
         void destroyD3D11();
-        bool createWIC();
-        void destroyWIC();
 #ifdef LUASTG_ENABLE_DIRECT2D
         bool createD2D1();
         void destroyD2D1();
@@ -153,11 +149,6 @@ namespace core {
         // Graphics
 
         std::unordered_set<IGraphicsPipeline*> m_graphics_pipeline_cache;
-
-        // Window Image Component
-
-        win32::com_ptr<IWICImagingFactory> wic_factory;
-        win32::com_ptr<IWICImagingFactory2> wic_factory2;
 
         // Direct2D 1
 
