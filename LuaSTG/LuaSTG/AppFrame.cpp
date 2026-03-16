@@ -395,8 +395,18 @@ void AppFrame::onBeforeUpdate() {
 		m_frame_rate_controller->update();
 	}
 
-	m_fFPS = 1.0 / m_frame_rate_controller->getStatistics()->getDuration(0);
-	m_fAvgFPS = 1.0 / m_frame_rate_controller->getStatistics()->getAverage(10);
+	// Avoid NaN/inf: only invert positive finite duration; use minimum duration to cap FPS and avoid 1/0
+	constexpr double min_duration = 1e-6; // cap reported FPS at 1e6
+	const auto* stats = m_frame_rate_controller->getStatistics();
+	double d0 = stats->getDuration(0);
+	if (d0 == d0 && d0 > 0.0) {
+		m_fFPS = 1.0 / (d0 < min_duration ? min_duration : d0);
+	}
+	// Use 60-frame average so GetFPS is stable at high FPS (10-frame window was too noisy at 2000+ FPS)
+	double avg = stats->getAverage(60);
+	if (avg == avg && avg > 0.0) {
+		m_fAvgFPS = 1.0 / (avg < min_duration ? min_duration : avg);
+	}
 	m_frame_rate_controller->setFrameRate(m_target_fps);
 	m_message_timer = core::ScopeTimer(&m_message_time);
 }
