@@ -21,6 +21,9 @@ namespace core {
                 l += 1;
             }
         }
+        if (l == 0) {
+            return 0.0;
+        }
         return result / static_cast<double>(l);
     }
 
