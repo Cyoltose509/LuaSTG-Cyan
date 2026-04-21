@@ -4,8 +4,8 @@
 namespace core {
 	class ShellIntegration {
 	public:
-		static bool openFile(std::string_view path);
-		static bool openDirectory(std::string_view path);
-		static bool openUrl(std::string_view url);
+		static bool openFile(std::string_view path, bool warning);
+		static bool openDirectory(std::string_view path, bool warning);
+		static bool openUrl(std::string_view url, bool warning);
 	};
 }
