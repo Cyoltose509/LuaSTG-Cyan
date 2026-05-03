@@ -128,7 +128,7 @@ namespace luastg
         // 装载纹理字体(fancy2d)
         bool LoadSpriteFont(const char* name, const char* path, const char* tex_path, bool mipmaps = true) noexcept;
         // 加载矢量字体
-        bool LoadTTFFont(const char* name, const char* path, float width, float height) noexcept;
+        bool LoadTTFFont(const char *name, const char *path, float width, float height) noexcept;
         bool LoadTrueTypeFont(const char* name, core::Graphics::TrueTypeFontInfo* fonts, size_t count) noexcept;
         // 特效
         bool LoadFX(const char* name, const char* path) noexcept;

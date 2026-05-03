@@ -8,8 +8,7 @@
 
 namespace core {
 	class FreeTypeGlyphManager final
-		: public implement::ReferenceCounted<Graphics::IGlyphManager>
-		, public IGraphicsDeviceEventListener {
+		: public implement::ReferenceCounted<Graphics::IGlyphManager>, public IGraphicsDeviceEventListener {
 	public:
 		// IGraphicsDeviceEventListener
 
@@ -43,7 +42,7 @@ namespace core {
 
 	private:
 		struct Image2D {
-			static constexpr uint32_t texture_size{ 1024 };
+			static constexpr uint32_t texture_size{ 2048 };
 			uint32_t width{ texture_size };
 			uint32_t height{ texture_size };
 			uint32_t pitch{ texture_size * sizeof(Color4B) };
